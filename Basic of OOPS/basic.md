@@ -13,6 +13,7 @@ Concepts:
 8. Interface
 
  - Java allows only one public class per file, and the filename must match that class.
+
 Basic Code:
 ```java
 import java.util.*;
@@ -235,7 +236,7 @@ public class Main {
 ```
 
 **Interface**:
- - Helps achieve loose coupling(Imp point)
+ - Helps achieve loose coupling - checkouts LSP(betterly exaplined in there)(Imp point)
  - All methods in an interface are purely public and abstract by default.
  - All variables in an interface are public static final (constants).
  - A class can implement multiple interfaces (supports multiple inheritance).
@@ -341,3 +342,24 @@ public class Main {
  - Helps achieve loose coupling
  - Enables polymorphic behavior
  - This is how Lislov substitiution & Open/Closed Principle
+
+
+ Quick Rules of Thumb
+- Use an interface - "only rules, no code".
+     - Whoever uses interface must do this
+     - You don’t provide any logic — just the method names (like a contract)
+
+- Use an abstract class - Want to reuse code + give some rules like interface
+    ```java
+  abstract class Bird {
+    void eat() {
+        System.out.println("Bird eats");
+    }// child class may override this method -> Want to reuse code
+
+    abstract void fly(); // rule: must implement fly() -> like interface
+    }
+   ```
+
+ - Use a concrete class - when behavior is well-defined and won’t be extended.
+
+
