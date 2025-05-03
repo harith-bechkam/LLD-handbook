@@ -12,6 +12,7 @@ Concepts:
 7. Abstract Class & Methods
 8. Interface
 
+ - Java allows only one public class per file, and the filename must match that class.
 Basic Code:
 ```java
 import java.util.*;
