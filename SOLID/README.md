@@ -22,4 +22,8 @@ This helps avoid bugs in working code and supports scalability.
  - If the parent method expects some behavior, the child must preserve or enhance it, not break it.
 
  # I
- - 
+ - don't force the child class to implement the unwanted interface methods
+
+# D
+ - High-level modules should not depend on low-level modules. Both should depend on abstractions
+ - Abstractions should not depend on details. Details should depend on abstractions

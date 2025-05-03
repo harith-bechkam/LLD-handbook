@@ -54,7 +54,7 @@ class bird{
   }
 }
 
-interface flyableBirds{
+interface flyableBirds{ //we are defining set of rule -> whoever can fly can use this interface and write their fly logic
   void fly();
 }
 

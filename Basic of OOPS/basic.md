@@ -348,6 +348,7 @@ public class Main {
 - Use an interface - "only rules, no code".
      - Whoever uses interface must do this
      - You don’t provide any logic — just the method names (like a contract)
+     - interface when different classes need to follow the same contract but don’t necessarily share structure.
 
 - Use an abstract class - Want to reuse code + give some rules like interface
     ```java
@@ -360,6 +361,6 @@ public class Main {
     }
    ```
 
- - Use a concrete class - when behavior is well-defined and won’t be extended.
+ - Use a class - when behavior is well-defined and won’t be extended.
 
 
