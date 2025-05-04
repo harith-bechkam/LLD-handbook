@@ -1,0 +1,35 @@
+Main
+└── uses → PlayerFactory
+            └── creates → HumanPlayer / AIPlayer
+Player (abstract)
+├── HumanPlayer
+│    └── uses → HumanMoveStrategy
+└── AIPlayer
+     └── uses → AIMoveStrategy
+
+App
+└── has-a → Board
+          └── has-a → Cell[][]
+
+Enums:
+- Symbols (X, O)
+- GameStatus (IN_PROGRESS, DRAW, WIN)
+
+Interfaces:
+- MoveStrategy
+  ├── HumanMoveStrategy
+  └── AIMoveStrategy
+
+
+
+OOP Principles:
+
+✅ Encapsulation: State is private, access via getters/setters.
+
+✅ Inheritance: HumanPlayer extends Player.
+
+✅ Composition: App has-a Board, Board has-a 2D Cell array.
+
+✅ Strategy Pattern: MoveStrategy allows for future AI moves.
+
+✅ Factory Pattern: PlayerFactory abstracts player creation.

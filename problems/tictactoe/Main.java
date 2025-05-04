@@ -1,14 +1,14 @@
+package tictactoe;
+//class diagram
 // app has-a Board (composition)
 // Board has-a 2D array of Cell
 // HumanPlayer is-a Player (inheritance)
 // Symbol and GameStatus are enums
 
-
-import java.util.*;
 import java.util.Scanner;
 
 enum Symbols {
-	X,O
+	X, O
 }
 
 enum GameStatus {
@@ -21,7 +21,7 @@ abstract class Player {
 	private String name;
 	private Symbols symbol;
 
-	public Player(String name,Symbols symbol) {
+	public Player(String name, Symbols symbol) {
 		this.name = name;
 		this.symbol = symbol;
 	}
@@ -29,32 +29,39 @@ abstract class Player {
 	public String getName() {
 		return name;
 	}
+
 	public Symbols getSymbol() {
 		return symbol;
 	}
 
 	abstract public int[] getmovefromuser();
 }
+
+interface MoveStrategy {
+	int[] getMove(String player);
+}
+
+class HumanMoveStrategy implements MoveStrategy {
+	private Scanner sc = new Scanner(System.in);
+
+	public int[] getMove(String player) {
+		System.out.print(player + " Enter your move (row col): ");
+		return new int[] { sc.nextInt(), sc.nextInt() };
+	}
+
+}
+
 class HumanPlayer extends Player {
-	private Scanner sc=new Scanner(System.in);
-	public HumanPlayer(String name,Symbols symbol) {
-		super(name,symbol);
+	private MoveStrategy strategy;
+
+	public HumanPlayer(String name, Symbols symbol, MoveStrategy strategy) {
+		super(name, symbol);
+		this.strategy = strategy;
 	}
 
 	@Override
 	public int[] getmovefromuser() {
-		System.out.println(super.getName() + " enter your move(row,col)");
-		if (!sc.hasNextInt()) {
-			System.out.println("No more input! Exiting.");
-			System.exit(1);
-		}
-		int row = sc.nextInt();
-		if (!sc.hasNextInt()) {
-			System.out.println("No more input! Exiting.");
-			System.exit(1);
-		}
-		int col = sc.nextInt();
-		return new int[] {row,col};
+		return strategy.getMove(super.getName());
 	}
 }
 
@@ -82,13 +89,18 @@ class Cell {
 		this.symbol = symbol;
 	}
 }
+
 class Board {
 	private int size;
 	private Cell[][] grid;
 
+	public int getSize() {
+		return size;
+	}
+
 	public Board(int size) {
-		this.size=size;
-		this.grid=new Cell[size][size];
+		this.size = size;
+		this.grid = new Cell[size][size];
 		for (int i = 0; i < size; i++)
 			for (int j = 0; j < size; j++)
 				grid[i][j] = new Cell(i, j);
@@ -96,7 +108,7 @@ class Board {
 
 	public void printBoard() {
 		for (Cell[] row : grid) {
-			for (Cell cell      : row) {
+			for (Cell cell : row) {
 				System.out.print(cell.getSymbol() == null ? "-" : cell.getSymbol());
 				System.out.print(" ");
 			}
@@ -104,7 +116,7 @@ class Board {
 		}
 	}
 
-	public boolean makeMove(int row,int col,Symbols symbol) {
+	public boolean makeMove(int row, int col, Symbols symbol) {
 
 		if (grid[row][col].isEmpty()) {
 			grid[row][col].setSymbol(symbol);
@@ -116,27 +128,31 @@ class Board {
 	public boolean isFull() {
 		for (Cell[] row : grid)
 			for (Cell cell : row)
-				if (cell.isEmpty()) return false;
+				if (cell.isEmpty())
+					return false;
 		return true;
 	}
 
 	public boolean checkWin(Symbols symbol) {
 		for (int i = 0; i < size; i++) {
 			// Rows & Columns
-			if (checkRow(i, symbol) || checkColumn(i, symbol)) return true;
+			if (checkRow(i, symbol) || checkColumn(i, symbol))
+				return true;
 		}
 		return checkDiagonals(symbol);
 	}
 
 	private boolean checkRow(int row, Symbols symbol) {
 		for (int i = 0; i < size; i++)
-			if (grid[row][i].getSymbol() != symbol) return false;
+			if (grid[row][i].getSymbol() != symbol)
+				return false;
 		return true;
 	}
 
 	private boolean checkColumn(int col, Symbols symbol) {
 		for (int i = 0; i < size; i++)
-			if (grid[i][col].getSymbol() != symbol) return false;
+			if (grid[i][col].getSymbol() != symbol)
+				return false;
 		return true;
 	}
 
@@ -151,43 +167,51 @@ class Board {
 
 }
 
-
 class App {
 	private Board b;
 	private Player[] p;
 	private GameStatus status;
 	private int currplayer;
 
-	public App(int boardsize,Player p1,Player p2) {
+	public App(int boardsize, Player p1, Player p2) {
 		b = new Board(boardsize);
-		p = new Player[] {p1,p2};
+		p = new Player[] { p1, p2 };
 		status = GameStatus.IN_PROGRESS;
 		currplayer = 0;
 	}
 
 	public void play() {
 
-		while(status==GameStatus.IN_PROGRESS) {
+		while (status == GameStatus.IN_PROGRESS) {
 			b.printBoard();
 			Player cp = p[currplayer];
 			boolean moveMade = false;
 
-			while(!moveMade) {
+			while (!moveMade) {
 				int[] input = cp.getmovefromuser();
-				moveMade = b.makeMove(input[0],input[1],cp.getSymbol());
-				if (!moveMade) System.out.println("Invalid move. Try again.");
+				int row = input[0];
+				int col = input[1];
+
+				if (row < 0 || row >= b.getSize() || col < 0 || col >= b.getSize()) {
+					System.out.println("Invalid input. Row and column must be between 0 and " + (b.getSize() - 1));
+					continue;
+				}
+
+				moveMade = b.makeMove(row, col, cp.getSymbol());
+				if (!moveMade)
+					System.out.println("Cell already taken. Try again.");
 			}
 
-			if(b.checkWin(cp.getSymbol())) {
+			if (b.checkWin(cp.getSymbol())) {
 				status = GameStatus.WIN;
 				b.printBoard();
 				System.out.println(cp.getName() + " wins!");
 				return;
 			}
-			//no need to check false because if false means continue the play;
+			// no need to check false because if false means continue the play;
 
-			//check for draw(if board is fulled means draw only)
-			if(b.isFull()) {
+			// check for draw(if board is fulled means draw only)
+			if (b.isFull()) {
 				status = GameStatus.DRAW;
 				b.printBoard();
 				System.out.println("It's a draw!");
@@ -198,16 +222,26 @@ class App {
 
 	}
 
-
 }
 
+class PlayerFactory {
+	public Player createPlayer(String type, String name, Symbols symbol) {
+		if ("human".equalsIgnoreCase(type)) {
+			return new HumanPlayer(name, symbol, new HumanMoveStrategy());
+		}
+		// else if ("ai".equalsIgnoreCase(type)) return new AIPlayer(...);
+		throw new IllegalArgumentException("Unknown player type");
+	}
+}
 
 public class Main {
 	public static void main(String[] args) {
-		int boardsize=3;
-		Player p1 = new HumanPlayer("Player 1", Symbols.X);
-		Player p2 = new HumanPlayer("Player 2", Symbols.O);
-		App app = new App(boardsize,p1,p2);
+		int boardsize = 3;
+
+		PlayerFactory pf = new PlayerFactory();
+		Player p1 = pf.createPlayer("human", "Player 1", Symbols.X);
+		Player p2 = pf.createPlayer("human", "Player 1", Symbols.O);
+		App app = new App(boardsize, p1, p2);
 		app.play();
 	}
 }
