@@ -1,0 +1,294 @@
+const readline = require('readline')
+
+
+
+const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+})
+
+const askQuestion = (query) => {
+    return new Promise((resolve, reject) => {
+        rl.question(query, resolve)
+    })
+}
+
+
+
+
+class Passenger {
+    constructor(name, seats, price) {
+        this.bookingId = Math.random().toString(36).substring(2, 9)
+        this.name = name;
+        this.seats = seats;
+        this.price = price;
+    }
+
+    getBookingId() {
+        return this.bookingId
+    }
+}
+
+
+class Flight {
+    constructor(flightName, totalSeats, pricePerSeat) {
+        this.name = flightName
+        this.totalSeats = parseInt(totalSeats);
+        this.basePrice = parseInt(pricePerSeat);
+
+        this.availableSeats = parseInt(totalSeats);
+        this.currentPrice = parseInt(pricePerSeat);
+        this.passengers = []
+    }
+
+}
+
+class App {
+    constructor() {
+        this.flights = new Map()
+    }
+
+    createFlight(flightName, totalSeats, pricePerSeat) {
+        try {
+            const flight = new Flight(flightName, totalSeats, pricePerSeat)
+            this.flights.set(Math.random().toString(36).substring(2, 9), flight)
+            return 1
+        }
+        catch (err) {
+            console.error(err)
+            return 0
+        }
+    }
+
+    bookTicket(flightNameToBook, passengerDetails, seatCount) {
+        if (flightNameToBook === undefined || flightNameToBook === null) {
+            console.log("Flight name is required.");
+            return;
+        }
+        if (passengerDetails === undefined || passengerDetails === null || passengerDetails.length === 0) {
+            console.log("Passenger details are required.");
+            return;
+        }
+        if (seatCount === undefined || seatCount === null || seatCount <= 0) {
+            console.log("Seat count is required.");
+            return;
+        }
+        const flightDetails = [...this.flights.values()]
+        let myflight = flightDetails.find(f => f.name == flightNameToBook)
+        if (!myflight) {
+            console.log("Not a valid flight");
+            return;
+        }
+        if (seatCount > myflight.availableSeats) {
+            console.log(`Not enough seats available on this flight - ${myflight.name}.`);
+            return;
+        }
+        const totalPrice = myflight.currentPrice * seatCount;
+        const passenger = new Passenger(passengerDetails, seatCount, totalPrice);
+        myflight.passengers.push(passenger);
+        myflight.availableSeats -= seatCount;
+        myflight.currentPrice += 200;
+        console.log(`your Booking Id is ${passenger.getBookingId()}`)
+        console.log(`Booking successful for ${passengerDetails} on this flight - ${myflight.name}`);
+        console.log(`Total Price: ₹${totalPrice}`);
+
+    }
+
+    cancelTicket(flightNameToCancel, bookingId) {
+        if (flightNameToCancel === undefined || flightNameToCancel === null) {
+            console.log("Flight name is required.");
+            return;
+        }
+        if (bookingId === undefined || bookingId === null) {
+            console.log("Booking ID is required.");
+            return;
+        }
+        const flightDetails = [...this.flights.values()]
+        let myflight = flightDetails.find(f => f.name == flightNameToCancel)
+        if (!myflight) {
+            console.log("Not a valid flight");
+            return;
+        }
+        const index = myflight.passengers.findIndex(p => p.bookingId == bookingId);
+        if (index == -1) {
+            console.log(`No booking found for ${bookingId} on this Flight - ${myflight.name}`);
+            return;
+        }
+        const passenger = myflight.passengers[index];
+        const refundAmount = passenger.price
+        myflight.passengers.splice(index, 1);
+        myflight.availableSeats += passenger.seats;
+        myflight.currentPrice = Math.max(5000, myflight.currentPrice - 200);
+        console.log(`Ticket cancelled for ${passenger.name}`);
+        console.log(`Refund Amount: ₹${refundAmount}`);
+    }
+
+    printAllFlightDetails() {
+        try {
+            const flights = [...this.flights.values()];
+            if (flights.length === 0) {
+                console.log("No flights available.");
+                return;
+            }
+
+            flights.forEach(flight => {
+                this.printParticularFlightDetails(flight.name);
+            });
+        } catch (err) {
+            console.error("Error printing all flight details:", err);
+        }
+    }
+
+
+    printParticularFlightDetails(flightName) {
+        try {
+            const flight = [...this.flights.values()].find(f => f.name === flightName);
+
+            if (flight) {
+                console.log(`
+-----------------------------------------
+    Flight Name: ${flight.name}
+    Total Seats: ${flight.totalSeats}
+    Available Seats: ${flight.availableSeats}
+    Base Price: ₹${flight.basePrice}
+    Current Price: ₹${flight.currentPrice}
+    Passengers:
+            `);
+
+                if (flight.passengers.length === 0) {
+                    console.log("    No passengers yet.");
+                } else {
+                    flight.passengers.forEach(p => {
+                        console.log(`    - ${p.bookingId} ${p.name}, Seats: ${p.seats}`);
+                    });
+                }
+
+                console.log('-----------------------------------------');
+            }
+            else {
+                console.log(`Flight "${flightName}" not found.`);
+            }
+        }
+        catch (error) {
+            console.error("Error printing flight details:", error);
+        }
+    }
+
+}
+
+
+const app = new App()
+
+const handleChoice = async (choice) => {
+    switch (choice) {
+        case '1':
+            //add flight
+            const flightName = await askQuestion('Enter flight name: ')
+            const totalSeats = await askQuestion('Enter flight totalSeats: ')
+            const pricePerSeat = await askQuestion('Enter flight Price per seat: ')
+            const isValid = app.createFlight(flightName, totalSeats, pricePerSeat)
+            if (isValid) {
+                console.log(`
+ -----------------------------------------
+    Flight ${flightName} added successfully
+-----------------------------------------
+                `)
+            }
+            else {
+                console.log(`
+-----------------------------------------
+    Flight ${flightName} is not added
+-----------------------------------------
+                `)
+            }
+
+            mainMenu()
+            break;
+
+
+        case '2':
+            //book ticket
+            const flightNameToBook = await askQuestion('Enter flight name to book: ')
+            const seatCountStr = await askQuestion('Enter total number of seats to book: ')
+            const seatCount = parseInt(seatCountStr);
+
+            let passengerDetails = []
+            if (seatCount === 1) {
+                const name = await askQuestion('Enter passenger name: ');
+                passengerDetails.push(name);
+            }
+            else if (seatCount > 1) {
+                console.log(`Enter names of ${seatCount} passengers:`);
+                for (let i = 1; i <= seatCount; i++) {
+                    const name = await askQuestion(`Passenger ${i} name: `);
+                    passengerDetails.push(name);
+                }
+            }
+            else {
+                console.log('Invalid seat count.');
+                mainMenu()
+                return;
+            }
+
+
+
+            app.bookTicket(flightNameToBook, passengerDetails, seatCount)
+            mainMenu()
+            break;
+
+        case '3':
+            //cancel ticket
+            const flightNameToCancel = await askQuestion('Enter flight name to cancel: ')
+            const bookingId = await askQuestion('Enter your booking Id to cancel: ')
+
+            app.cancelTicket(flightNameToCancel, bookingId)
+            mainMenu()
+            break;
+
+        case '4':
+            //view all flight details
+            app.printAllFlightDetails()
+            mainMenu()
+            break;
+
+        case '5':
+            //View Particular Flight Detail
+            const fligtName = await askQuestion('Enter flight Name: ')
+            app.printParticularFlightDetails(fligtName)
+            mainMenu()
+            break;
+
+        case '6':
+            console.log('Program is stopping')
+            rl.close();
+            break;
+        default:
+            console.log('Invalid Choice from user.Try Again...')
+            mainMenu()
+    }
+}
+
+
+
+
+
+
+
+
+async function mainMenu() {
+    console.log(`
+--------------------------------------
+    Welcome to Flight booking management
+---------------------------------------
+    1. Add Flight
+    2. Book Ticket
+    3. Cancel Ticket
+    4. View All Flight Details
+    5. View Particular Flight Detail
+    6. Exit
+    `)
+    let baseques = await askQuestion(`Enter your choice: `);
+    await handleChoice(baseques)
+}
+
+mainMenu()
