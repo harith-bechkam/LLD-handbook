@@ -1,0 +1,13 @@
+Store Module – Add new mail.
+
+Delete Module – Delete a mail by ID.
+
+Tag Module – Add tags to a mail.
+
+Stats Module – Show mail count, tag groups, and recent N mails.
+
+Spam Module – Auto-tag spam using a dictionary.
+
+Search Module – Search mails by query.
+
+Wildcard Search – Simple wildcard match (* support).
