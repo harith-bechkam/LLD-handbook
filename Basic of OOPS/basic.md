@@ -344,23 +344,22 @@ public class Main {
  - This is how Lislov substitiution & Open/Closed Principle
 
 
- Quick Rules of Thumb
-- Use an interface - "only rules, no code".
-     - Whoever uses interface must do this
-     - You don’t provide any logic — just the method names (like a contract)
-     - interface when different classes need to follow the same contract but don’t necessarily share structure.
+ **Interface vs Abstract class**
+ - (1) all methods in interface should definitely used in class if the class implemented the interface  
+ - (1) no need to implement all methods in class if the class extends the abstract class
 
-- Use an abstract class - Want to reuse code + give some rules like interface
-    ```java
-  abstract class Bird {
-    void eat() {
-        System.out.println("Bird eats");
-    }// child class may override this method -> Want to reuse code
+ - (2) interface - can't be instantiated(can't able to create object for this)  
+ - (2) abstract - can't be instantiated(can't able to create object for this)
 
-    abstract void fly(); // rule: must implement fly() -> like interface
-    }
-   ```
+ - (3) all methods in interface should definitely be public abstract and variables - public static final  
+ - (3) all methods in abstract should deinintely be abstract but some methods may not be declared with abstract also possible
 
- - Use a class - when behavior is well-defined and won’t be extended.
+ - (4) interface - all methods should only have declaration.no need definition  
+ - (4) abstract class - all methods can have declaration and also definition is possible in abstract class(with definition methods - called as concrete methods)
 
+ - (5) We can achieve multiple Inheritance in using Interface(using implements A,B)  
+ - (5) We can't achieve multiple Inheritance in using abstract(using extends A,B - it's wrong)
 
+then what is pupose of Interface vs Abstract class  
+ - Interface - is like defining the set of rules.which ever class Implements the interface definitely should follow the interface all rules compulsorly  
+ - Abstract class - is like provide the base class to which ever class uses abstract class.(abstract class will provide variables,methods to the child class)
